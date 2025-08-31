@@ -1,54 +1,53 @@
-# Proyecto Base Implementando Clean Architecture
+# Matching Engine Microservice
 
-## Antes de Iniciar
+Microservicio de motor de emparejamiento de órdenes implementado con Clean Architecture, diseñado para gestionar órdenes de compra y venta con funcionalidades de libro de órdenes y cotización en tiempo real.
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
-
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
-
-# Arquitectura
+## Arquitectura
 
 ![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
 
 ## Domain
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+### Model
+Contiene las entidades del dominio:
+- **Order**: Entidad principal que representa una orden con id, tipo (BUY/SELL), precio y cantidad
+- **OrderBook**: Libro de órdenes que agrupa órdenes de compra y venta
+- **OrderItem**: Elemento individual del libro de órdenes
+- **QuotaSummary**: Resumen de cotización con mejor compra y venta
+- **Quota**: Información de cotización individual
+- **OrderType**: Enumeración para tipos de orden (BUY/SELL)
+- **Excepciones**: OrderException, BusinessException, TechnicalException
 
-## Usecases
-
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+### Usecase
+Implementa la lógica de negocio:
+- **OrderUseCase**: Casos de uso para gestión de órdenes (crear, actualizar, cancelar, obtener libro, obtener cotización)
 
 ## Infrastructure
 
-### Helpers
-
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
-
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
-
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
-
 ### Driven Adapters
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+#### LMAX Trading Adapter
+Implementación del motor de emparejamiento usando LMAX Disruptor:
+- **OrderAdapter**: Implementa OrderGateway para gestión de órdenes
+- **PriceLevelPQ**: Cola de prioridad para niveles de precio
+- **TraceConfig**: Configuración de trazabilidad
 
 ### Entry Points
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+#### Reactive Web
+API REST reactiva con Spring WebFlux:
+- **MatchEngineController**: Controlador principal con endpoints REST
+- **MatchEngineManager**: Gestor de lógica de negocio
+- **OrderMapper**: Mapeo entre DTOs y entidades del dominio
+- **DTOs**: OrderDTO, OrderBookDTO, QuotaSummaryDTO, QuotaDTO, OrderItemDTO
+- **Requests**: CreateOrderRequest, UpdateOrderRequest
+- **Configuración**: CORS, Security Headers, Exception Handlers
 
 ## Application
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
-
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+Módulo de configuración y arranque de la aplicación con inyección de dependencias automática mediante @ComponentScan.
 
 ## API REST Endpoints
-
-La aplicación expone los siguientes endpoints REST a través del módulo reactive-web:
 
 ### 1. Crear Orden
 ```
@@ -90,7 +89,15 @@ Content-Type: application/json
 DELETE /api/v1/order/{id}
 ```
 
-### Ejemplos con cURL
+## Funcionalidades del Motor de Emparejamiento
+
+- **Gestión de Órdenes**: Crear, actualizar y cancelar órdenes de compra y venta
+- **Libro de Órdenes**: Visualización completa del estado actual del mercado
+- **Cotización Level 1**: Mejor precio de compra y venta disponible
+- **Arquitectura Reactiva**: Implementación no bloqueante con Spring WebFlux
+- **Motor LMAX**: Uso de LMAX Disruptor para alto rendimiento
+
+## Ejemplos de Uso
 
 ```bash
 # Crear orden de compra
@@ -117,3 +124,11 @@ curl -X PUT http://localhost:8080/api/v1/order \
 # Cancelar orden
 curl -X DELETE http://localhost:8080/api/v1/order/1
 ```
+
+## Tecnologías
+
+- **Spring Boot**: Framework base
+- **Spring WebFlux**: Programación reactiva
+- **LMAX Disruptor**: Motor de alto rendimiento
+- **Gradle**: Gestión de dependencias
+- **Clean Architecture**: Patrón arquitectónico
