@@ -11,14 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Service
 @AllArgsConstructor
 @Slf4j
 public class MatchEngineManager {
 
     private final OrderUseCase orderUseCase;
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
     public Mono<Void> addOrder(CreateOrderRequest createOrderRequest) {
+        createOrderRequest.setId(counter.incrementAndGet());
         return this.orderUseCase.addOrder(OrderMapper.MAPPER.createOrderRequestToModel(createOrderRequest));
     }
 
