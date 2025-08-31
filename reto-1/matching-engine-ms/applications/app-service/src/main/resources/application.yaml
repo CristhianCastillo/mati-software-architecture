@@ -1,14 +1,46 @@
-##Spring Configuration
 server:
   port: 8080
 spring:
   application:
-    name: matching-engine-ms
+    name: "matching-engine-ms"
   devtools:
     add-properties: false
   h2:
     console:
       enabled: true
-      path: /h2
+      path: "/h2"
   profiles:
-    include:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors.allowed:
+  - path: "/**"
+    headers:
+      - "*"
+    origins:
+      - "http://localhost:4200"
+      - "http://localhost:8081"
+      - "https://sgb-web-prod.azureedge.net"
+    methods:
+      - "HEAD"
+      - "OPTIONS"
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+  - path: "/somePath/**"
+    headers:
+      - "*"
+    origins:
+      - "http://localhost:4200"
+    methods:
+      - "GET"
+      - "POST"
