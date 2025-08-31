@@ -45,3 +45,75 @@ Los entry points representan los puntos de entrada de la aplicación o el inicio
 Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
 
 **Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+
+## API REST Endpoints
+
+La aplicación expone los siguientes endpoints REST a través del módulo reactive-web:
+
+### 1. Crear Orden
+```
+POST /api/v1/order
+Content-Type: application/json
+
+{
+  "id": 1,
+  "orderType": "BUY",
+  "price": 100.50,
+  "quantity": 10
+}
+```
+
+### 2. Obtener Libro de Órdenes
+```
+GET /api/v1/orders
+```
+
+### 3. Obtener Resumen de Cotización (Level 1)
+```
+GET /api/v1/quota/level1
+```
+
+### 4. Actualizar Orden
+```
+PUT /api/v1/order
+Content-Type: application/json
+
+{
+  "id": 1,
+  "price": 105.00,
+  "quantity": 15
+}
+```
+
+### 5. Cancelar Orden
+```
+DELETE /api/v1/order/{id}
+```
+
+### Ejemplos con cURL
+
+```bash
+# Crear orden de compra
+curl -X POST http://localhost:8080/api/v1/order \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1, "orderType": "BUY", "price": 100.50, "quantity": 10}'
+
+# Crear orden de venta
+curl -X POST http://localhost:8080/api/v1/order \
+  -H "Content-Type: application/json" \
+  -d '{"id": 2, "orderType": "SELL", "price": 99.50, "quantity": 5}'
+
+# Obtener libro de órdenes
+curl -X GET http://localhost:8080/api/v1/orders
+
+# Obtener mejor compra y venta
+curl -X GET http://localhost:8080/api/v1/quota/level1
+
+# Actualizar orden
+curl -X PUT http://localhost:8080/api/v1/order \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1, "price": 105.00, "quantity": 15}'
+
+# Cancelar orden
+curl -X DELETE http://localhost:8080/api/v1/order/1
+```
