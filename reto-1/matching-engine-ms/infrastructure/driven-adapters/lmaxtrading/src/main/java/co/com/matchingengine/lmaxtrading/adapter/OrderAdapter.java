@@ -11,6 +11,7 @@ import co.com.matchingengine.model.order.gateways.OrderGateway;
 import co.com.matchingengine.model.quota.Quota;
 import co.com.matchingengine.model.quota.QuotaSummary;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class OrderAdapter implements OrderGateway {
     private final NavigableMap<Double, PriceLevelPQ> buyPriceLevels = new TreeMap<>();
     private final NavigableMap<Double, PriceLevelPQ> sellPriceLevels = new TreeMap<>();
     private final ObjectMapper objectMapper;
+    private final Timer matchOrderTimer;
 
     @Override
     public Mono<Void> addOrder(Order order) {
@@ -140,44 +142,46 @@ public class OrderAdapter implements OrderGateway {
         return Mono.defer(() -> {
                     while (!buyPriceLevels.isEmpty() && !sellPriceLevels.isEmpty() &&
                             Double.compare(buyPriceLevels.lastKey(), sellPriceLevels.firstKey()) >= 0) {
-                        long startTime = System.currentTimeMillis();
-                        final Map.Entry<Double, PriceLevelPQ> buyEntry = buyPriceLevels.pollLastEntry(); // O(1)
-                        final Map.Entry<Double, PriceLevelPQ> sellEntry = sellPriceLevels.pollFirstEntry(); // O(1)
+                        this.matchOrderTimer.record(() -> {
+                            long startTime = System.currentTimeMillis();
+                            final Map.Entry<Double, PriceLevelPQ> buyEntry = buyPriceLevels.pollLastEntry(); // O(1)
+                            final Map.Entry<Double, PriceLevelPQ> sellEntry = sellPriceLevels.pollFirstEntry(); // O(1)
 
-                        final PriceLevelPQ buyPriceLevel = buyEntry.getValue();
-                        final PriceLevelPQ sellPriceLevel = sellEntry.getValue();
+                            final PriceLevelPQ buyPriceLevel = buyEntry.getValue();
+                            final PriceLevelPQ sellPriceLevel = sellEntry.getValue();
 
-                        final Order buyOrder = buyPriceLevel.pollBestOrder();
-                        final Order sellOrder = sellPriceLevel.pollBestOrder();
+                            final Order buyOrder = buyPriceLevel.pollBestOrder();
+                            final Order sellOrder = sellPriceLevel.pollBestOrder();
 
-                        log.info("BEFORE MATCH :: Buy Order: {} with Sell Order: {}", buyOrder, sellOrder);
+                            log.info("BEFORE MATCH :: Buy Order: {} with Sell Order: {}", buyOrder, sellOrder);
 
-                        final int buyQty = buyOrder.getQuantity();
-                        final int sellQty = sellOrder.getQuantity();
+                            final int buyQty = buyOrder.getQuantity();
+                            final int sellQty = sellOrder.getQuantity();
 
-                        final int fillQty = Math.min(buyQty, sellQty);
-                        buyOrder.setQuantity(buyQty - fillQty);
-                        sellOrder.setQuantity(sellQty - fillQty);
+                            final int fillQty = Math.min(buyQty, sellQty);
+                            buyOrder.setQuantity(buyQty - fillQty);
+                            sellOrder.setQuantity(sellQty - fillQty);
 
-                        log.info("Matched Order Quantity: {} ;; {}", fillQty, sellOrder.getPrice());
-                        log.info("AFTER MATCH :: Buy Order: {} with Sell Order: {}", buyOrder, sellOrder);
+                            log.info("Matched Order Quantity: {} ;; {}", fillQty, sellOrder.getPrice());
+                            log.info("AFTER MATCH :: Buy Order: {} with Sell Order: {}", buyOrder, sellOrder);
 
-                        if (buyOrder.getQuantity() > 0) {
-                            buyPriceLevel.addOrder(buyOrder);
-                            buyPriceLevels.put(buyEntry.getKey(), buyPriceLevel);
-                        }
-                        if (sellOrder.getQuantity() > 0) {
-                            sellPriceLevel.addOrder(sellOrder);
-                            sellPriceLevels.put(sellEntry.getKey(), sellPriceLevel);
-                        }
-                        if (!buyPriceLevel.isEmpty()) {
-                            buyPriceLevels.putIfAbsent(buyEntry.getKey(), buyPriceLevel);
-                        }
-                        if (!sellPriceLevel.isEmpty()) {
-                            sellPriceLevels.putIfAbsent(sellEntry.getKey(), sellPriceLevel);
-                        }
-                        long endTime = System.currentTimeMillis() - startTime;
-                        log.info("Time taken to match order: {} ms", endTime);
+                            if (buyOrder.getQuantity() > 0) {
+                                buyPriceLevel.addOrder(buyOrder);
+                                buyPriceLevels.put(buyEntry.getKey(), buyPriceLevel);
+                            }
+                            if (sellOrder.getQuantity() > 0) {
+                                sellPriceLevel.addOrder(sellOrder);
+                                sellPriceLevels.put(sellEntry.getKey(), sellPriceLevel);
+                            }
+                            if (!buyPriceLevel.isEmpty()) {
+                                buyPriceLevels.putIfAbsent(buyEntry.getKey(), buyPriceLevel);
+                            }
+                            if (!sellPriceLevel.isEmpty()) {
+                                sellPriceLevels.putIfAbsent(sellEntry.getKey(), sellPriceLevel);
+                            }
+                            long endTime = System.currentTimeMillis() - startTime;
+                            log.info("Time taken to match order: {} ms", endTime);
+                        });
                     }
                     return Mono.empty()
                             .doOnSuccess(i -> {
