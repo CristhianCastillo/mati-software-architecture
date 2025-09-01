@@ -1,0 +1,150 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class MatchEngineController {
+  + MatchEngineController(MatchEngineManager): 
+  - matchEngine: MatchEngineManager
+  - log: Logger
+  + addOrder(CreateOrderRequest): Mono<ResponseEntity<GenericResponse<String>>>
+  + getOrdersBook(): Mono<ResponseEntity<GenericResponse<OrderBookDTO>>>
+  + cancelOrder(int): Mono<ResponseEntity<GenericResponse<String>>>
+  + getQuotaSummary(): Mono<ResponseEntity<GenericResponse<QuotaSummaryDTO>>>
+  + updateOrder(UpdateOrderRequest): Mono<ResponseEntity<GenericResponse<String>>>
+}
+class MatchEngineManager {
+  + MatchEngineManager(OrderUseCase): 
+  - log: Logger
+  - orderUseCase: OrderUseCase
+  - counter: AtomicInteger
+  + getBestBuyAndSell(): Mono<QuotaSummaryDTO>
+  + updateOrder(UpdateOrderRequest): Mono<Void>
+  + cancelOrder(int): Mono<Void>
+  + addOrder(CreateOrderRequest): Mono<Void>
+  + getOrderBook(): Mono<OrderBookDTO>
+}
+class Order {
+  + Order(int, OrderType, LocalDateTime, double, int): 
+  + Order(int, OrderType, double, int): 
+  + Order(Order): 
+  - entryTime: LocalDateTime
+  - id: int
+  - price: double
+  - orderType: OrderType
+  - quantity: int
+  + getQuantity(): int
+  + getEntryTime(): LocalDateTime
+  + toString(): String
+  + hashCode(): int
+  + setPrice(double): void
+  + equals(Object): boolean
+  + getPrice(): double
+  + toBuilder(): OrderBuilder
+  + getOrderType(): OrderType
+  + getId(): int
+  + builder(): OrderBuilder
+  + setQuantity(int): void
+}
+class OrderAdapter {
+  + OrderAdapter(ObjectMapper, Timer): 
+  - buyPriceLevels: NavigableMap<Double, PriceLevelPQ>
+  - matchOrderTimer: Timer
+  - objectMapper: ObjectMapper
+  - log: Logger
+  - orderCache: Map<Integer, Order>
+  - sellPriceLevels: NavigableMap<Double, PriceLevelPQ>
+  + cancelOrder(int): Mono<Void>
+  - removeOrder(NavigableMap<Double, PriceLevelPQ>, Order): Mono<Void>
+  - removeAndAddOrder(Order, Order): Mono<Void>
+  + addOrder(Order): Mono<Void>
+  - matchOrders(): Mono<Void>
+  - removeOrder(Order): Mono<Void>
+  + printBestBuyAndSell(): Mono<QuotaSummary>
+  + printOrderBook(): Mono<OrderBook>
+  + updateOrder(Order): Mono<Void>
+  - addOrderAndMatch(Order): Mono<Void>
+  - getOrderItemsFromMap(NavigableMap<Double, PriceLevelPQ>): List<OrderItem>
+}
+class OrderBook {
+  + OrderBook(List<OrderItem>, List<OrderItem>): 
+  - buyOrders: List<OrderItem>
+  - sellOrders: List<OrderItem>
+  + toBuilder(): OrderBookBuilder
+  + getSellOrders(): List<OrderItem>
+  + setSellOrders(List<OrderItem>): void
+  + setBuyOrders(List<OrderItem>): void
+  + getBuyOrders(): List<OrderItem>
+  + builder(): OrderBookBuilder
+}
+interface OrderGateway << interface >> {
+  + updateOrder(Order): Mono<Void>
+  + printBestBuyAndSell(): Mono<QuotaSummary>
+  + cancelOrder(int): Mono<Void>
+  + addOrder(Order): Mono<Void>
+  + printOrderBook(): Mono<OrderBook>
+}
+class OrderItem {
+  + OrderItem(double, int, int, List<Order>): 
+  - price: double
+  - totalVolumeActions: int
+  - totalOrders: int
+  - orders: List<Order>
+  + setTotalOrders(int): void
+  + builder(): OrderItemBuilder
+  + addOrder(Order): void
+  + toBuilder(): OrderItemBuilder
+  + setTotalVolumeActions(int): void
+  + getTotalVolumeActions(): int
+  + getOrders(): List<Order>
+  + setPrice(double): void
+  + getPrice(): double
+  + getTotalOrders(): int
+  + setOrders(List<Order>): void
+}
+enum OrderType << enumeration >> {
+  - OrderType(): 
+  + BUY: 
+  + SELL: 
+  + valueOf(String): OrderType
+  + values(): OrderType[]
+}
+class OrderUseCase {
+  + OrderUseCase(OrderGateway): 
+  - orderGateway: OrderGateway
+  + cancelOrder(int): Mono<Void>
+  + getBestBuyAndSell(): Mono<QuotaSummary>
+  + getOrderBook(): Mono<OrderBook>
+  + addOrder(Order): Mono<Void>
+  + updateOrder(Order): Mono<Void>
+}
+class PriceLevelPQ {
+  + PriceLevelPQ(double): 
+  - orders: PriorityQueue<Order>
+  - totalVolume: int
+  - price: double
+  + addOrder(Order): void
+  + getLevel1(): String
+  + getOrders(): PriorityQueue<Order>
+  + removeOrder(Order): void
+  + toString(): String
+  + totalOrders(): int
+  + hashCode(): int
+  + equals(Object): boolean
+  + isEmpty(): boolean
+  + getTotalVolume(): int
+  + pollBestOrder(): Order
+  + getPrice(): double
+}
+
+MatchEngineController "1" *-[#595959,plain]-> "matchEngine\n1" MatchEngineManager    
+MatchEngineManager    "1" *-[#595959,plain]-> "orderUseCase\n1" OrderUseCase          
+Order                 "1" *-[#595959,plain]-> "orderType\n1" OrderType             
+OrderAdapter          "1" *-[#595959,plain]-> "orderCache\n*" Order                 
+OrderAdapter           -[#008200,dashed]-^  OrderGateway          
+OrderAdapter          "1" *-[#595959,plain]-> "buyPriceLevels\n*" PriceLevelPQ          
+OrderBook             "1" *-[#595959,plain]-> "buyOrders\n*" OrderItem             
+OrderItem             "1" *-[#595959,plain]-> "orders\n*" Order                 
+OrderUseCase          "1" *-[#595959,plain]-> "orderGateway\n1" OrderGateway          
+@enduml
