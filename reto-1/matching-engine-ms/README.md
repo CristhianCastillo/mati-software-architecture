@@ -132,3 +132,11 @@ curl -X DELETE http://localhost:8080/api/v1/order/1
 - **LMAX Disruptor**: Motor de alto rendimiento
 - **Gradle**: Gestión de dependencias
 - **Clean Architecture**: Patrón arquitectónico
+
+## Sources:
+- https://red-robot-8317.postman.co/workspace/My-Workspace~d670895d-c3f4-4288-8090-1c0e90e76386/collection/5854488-caed99e8-0d81-4141-97ed-6242927e90cc?action=share&source=copy-link&creator=5854488
+- https://www.jetbrains.com/help/idea/class-diagram.html#analyze_graph
+- https://lmax-exchange.github.io/disruptor/
+- https://martinfowler.com/articles/lmax.html
+- https://github.com/backstreetbrogrammer/13_TopCodingInterviewSolutionsInJava?tab=readme-ov-file#problem-11-design-order-matching-engine
+- https://github.com/backstreetbrogrammer/13_TopCodingInterviewSolutionsInJava/blob/main/src/test/java/com/backstreetbrogrammer/Q11_MatchingEngine/twoD/OrderBookUsingSortedMapAndPQTest.java
