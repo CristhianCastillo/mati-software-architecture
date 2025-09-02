@@ -28,30 +28,24 @@ cd reto-1/observability
 docker-compose up -d
 ```
 
-### 2. Build and Run Matching Engine
+### 2. Start Matching Engine
 
 **Linux/macOS:**
 ```bash
 cd reto-1/matching-engine-ms
-./gradlew clean build
-cd applications/app-service/build/libs
-java -jar matching-engine-ms.jar
+docker compose up -d or docker-compose up -d
 ```
 
 **Windows (Command Prompt):**
 ```cmd
 cd reto-1\matching-engine-ms
-gradlew.bat clean build
-cd applications\app-service\build\libs
-java -jar matching-engine-ms.jar
+docker compose up -d or docker-compose up -d
 ```
 
 **Windows (PowerShell):**
 ```powershell
 cd reto-1/matching-engine-ms
-./gradlew.bat clean build
-cd applications/app-service/build/libs
-java -jar matching-engine-ms.jar
+docker compose up -d or docker-compose up -d
 ```
 
 ### 3. Run Load Tests
@@ -97,3 +91,7 @@ Access Prometheus metrics at: http://localhost:9090/query?g0.expr=order_matching
 | Destroy | `docker compose down` |
 
 *Run commands from `reto-1/observability` directory*
+
+# Sources:
+- https://grafana.com/docs/grafana-cloud/send-data/alloy/tutorials/send-logs-to-loki/
+- https://grafana.com/docs/loki/latest/get-started/quick-start/quick-start/
