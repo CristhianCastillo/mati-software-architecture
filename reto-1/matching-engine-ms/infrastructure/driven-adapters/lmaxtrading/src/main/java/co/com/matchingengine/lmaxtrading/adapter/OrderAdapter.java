@@ -10,7 +10,7 @@ import co.com.matchingengine.model.order.OrderType;
 import co.com.matchingengine.model.order.gateways.OrderGateway;
 import co.com.matchingengine.model.quota.Quota;
 import co.com.matchingengine.model.quota.QuotaSummary;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,8 @@ public class OrderAdapter implements OrderGateway {
     private final Map<Integer, Order> orderCache = new HashMap<>();
     private final NavigableMap<Double, PriceLevelPQ> buyPriceLevels = new TreeMap<>();
     private final NavigableMap<Double, PriceLevelPQ> sellPriceLevels = new TreeMap<>();
-    private final ObjectMapper objectMapper;
     private final Timer matchOrderTimer;
+    private final Counter matchOrderErrorCount;
 
     @Override
     public Mono<Void> addOrder(Order order) {
@@ -128,8 +128,8 @@ public class OrderAdapter implements OrderGateway {
             }
             return Mono.empty()
                     .doOnSuccess(i -> {
-                        log.info("Buy Orders: {}", this.buyPriceLevels);
-                        log.info("Sell Orders: {}", this.sellPriceLevels);
+                        log.debug("Buy Orders: {}", this.buyPriceLevels);
+                        log.debug("Sell Orders: {}", this.sellPriceLevels);
                     })
                     .doOnSuccess(i -> this.matchOrders()
                             .subscribeOn(Schedulers.boundedElastic())
@@ -185,14 +185,17 @@ public class OrderAdapter implements OrderGateway {
                     }
                     return Mono.empty()
                             .doOnSuccess(i -> {
-                                log.info("AFTER MATCH :: Buy Orders: {}", this.buyPriceLevels);
-                                log.info("AFTER MATCH :: Sell Orders: {}", this.sellPriceLevels);
+                                log.debug("AFTER MATCH :: Buy Orders: {}", this.buyPriceLevels);
+                                log.debug("AFTER MATCH :: Sell Orders: {}", this.sellPriceLevels);
                             })
                             .then();
                 })
                 .doOnSubscribe(sub -> log.info("******Starting order matching..."))
                 .doOnSuccess(voi -> log.info("******Order matching completed."))
-                .doOnError(error -> log.error("******Error occurred while matching orders.", error))
+                .doOnError(error -> {
+                    log.error("******Error occurred while matching orders.", error);
+                    this.matchOrderErrorCount.increment();
+                })
                 .then();
     }
 

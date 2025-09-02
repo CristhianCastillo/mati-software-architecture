@@ -52,7 +52,7 @@ public class MatchEngineController {
                 .doOnSubscribe(subscription -> log.info("Get Orders Book :: Request"))
                 .doOnSuccess(response -> log.info("Get Orders Book :: Response Success", kv("book", response)))
                 .doOnError(error -> log.error("Get Orders :: Response Error", kv("orderBookResponseError", error)))
-                .map(orderBook -> new ResponseEntity<>(GenericResponse.success(orderBook), HttpStatus.CREATED));
+                .map(orderBook -> new ResponseEntity<>(GenericResponse.success(orderBook), HttpStatus.OK));
     }
 
     @GetMapping(path = "/quota/level1")
@@ -61,7 +61,7 @@ public class MatchEngineController {
                 .doOnSubscribe(subscription -> log.info("Get Best Buy and Sell :: Request"))
                 .doOnSuccess(response -> log.info("Get Best Buy and Sell :: Response Success", kv("response", response)))
                 .doOnError(error -> log.error("Get Best Buy and Sell :: Response Error", kv("responseError", error)))
-                .map(quotaSummary -> new ResponseEntity<>(GenericResponse.success(quotaSummary), HttpStatus.CREATED));
+                .map(quotaSummary -> new ResponseEntity<>(GenericResponse.success(quotaSummary), HttpStatus.OK));
     }
 
     @PutMapping(path = "/order")

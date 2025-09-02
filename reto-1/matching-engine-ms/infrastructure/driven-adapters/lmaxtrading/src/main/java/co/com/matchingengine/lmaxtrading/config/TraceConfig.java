@@ -1,5 +1,6 @@
 package co.com.matchingengine.lmaxtrading.config;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,13 @@ public class TraceConfig {
                 .publishPercentileHistogram()
                 .minimumExpectedValue(java.time.Duration.ofMillis(1))
                 .maximumExpectedValue(java.time.Duration.ofSeconds(10))
+                .register(meterRegistry);
+    }
+
+    @Bean("matchOrderErrorCount")
+    public Counter matchOrderErrorCount() {
+        return Counter.builder("order.matching.count.error")
+                .description("Total number of match orders with error")
                 .register(meterRegistry);
     }
 }
