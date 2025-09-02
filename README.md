@@ -13,19 +13,19 @@
 **Linux/macOS:**
 ```bash
 cd reto-1/observability
-docker compose up -d
+docker compose up -d or docker-compose up -d
 ```
 
 **Windows (Command Prompt):**
 ```cmd
 cd reto-1\observability
-docker compose up -d
+docker-compose up -d
 ```
 
 **Windows (PowerShell):**
 ```powershell
 cd reto-1/observability
-docker compose up -d
+docker-compose up -d
 ```
 
 ### 2. Build and Run Matching Engine
