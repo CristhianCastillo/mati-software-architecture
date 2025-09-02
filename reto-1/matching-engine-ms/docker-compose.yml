@@ -1,0 +1,26 @@
+services:
+  matching-engine-ms:
+      image: cristhian117/matching-engine-ms:1.0.0
+      mem_limit: 700m
+      ports:
+        - "8080:8080"
+      networks:
+        - matching-engine
+      deploy:
+        restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 3
+          window: 120s
+      healthcheck:
+        test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+        interval: 10s
+        timeout: 5s
+        retries: 10
+        start_period: 10s
+      environment:
+        SPRING_PROFILES_ACTIVE: "dev"
+
+networks:
+  matching-engine:
+    driver: bridge

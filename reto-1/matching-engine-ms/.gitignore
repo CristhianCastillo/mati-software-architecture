@@ -334,3 +334,6 @@ gradle-app.setting
 # -----
 *.hprof
 build-cache
+
+# Push DockerFiles
+push_docker_images.sh
