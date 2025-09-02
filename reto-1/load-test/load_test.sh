@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load Test Script for Matching Engine
-# Target: 80 matches/sec for 3 min, 100 matches/sec for 2 min, 80 matches/sec for 1 min
+# Target: 18 matches/sec for 4 min, 84 matches/sec for 30 min, 18 matches/sec for 4 min
 
 BASE_URL="http://localhost:8080/api/v1/order"
 ORDER_ID=1
@@ -33,7 +33,7 @@ generate_orders() {
     local total_matches=$((matches_per_second * duration_seconds))
     local interval=$(echo "scale=3; 1.0 / $matches_per_second" | bc -l)
     
-    echo "Generating $matches_per_second matches/sec for $duration_seconds seconds (Total: $total_matches matches)"
+    echo "Generating $matches_per_second matches/sec for $duration_seconds seconds (Total: $total_matches request)"
     echo "Interval between matches: ${interval}s"
     
     for ((i=1; i<=total_matches; i++)); do
@@ -75,43 +75,43 @@ fi
 echo "Starting Load Test for Matching Engine"
 echo "======================================="
 echo "Test Plan:"
-echo "- Phase 1: 80 matches/sec for 3 minutes"
-echo "- Phase 2: 100 matches/sec for 2 minutes"
-echo "- Phase 3: 80 matches/sec for 1 minute"
+echo "- Phase 1: 18 matches/sec for 4 minutes"
+echo "- Phase 2: 84 matches/sec for 30 minutes"
+echo "- Phase 3: 18 matches/sec for 4 minute"
 echo "======================================="
 
-# Phase 1: 80 matches/sec for 3 minutes (180 seconds)
+# Phase 1: 18 matches/sec for 4 minutes (240 seconds)
 echo ""
-echo "PHASE 1: Starting 80 matches/sec for 3 minutes..."
+echo "PHASE 1: Starting 18 matches/sec for 4 minutes..."
 start_time=$(date +%s)
-generate_orders 80 180
+generate_orders 18 240
 phase1_end=$(date +%s)
 echo "Phase 1 completed in $((phase1_end - start_time)) seconds"
 
-# Phase 2: 100 matches/sec for 2 minutes (120 seconds)
+# Phase 2: 84 matches/sec for 30 minutes (1800 seconds)
 echo ""
-echo "PHASE 2: Starting 100 matches/sec for 2 minutes..."
+echo "PHASE 2: Starting 84 matches/sec for 30 minutes..."
 phase2_start=$(date +%s)
-generate_orders 100 120
+generate_orders 84 1800
 phase2_end=$(date +%s)
 echo "Phase 2 completed in $((phase2_end - phase2_start)) seconds"
 
-# Phase 3: 80 matches/sec for 1 minute (60 seconds)
+# Phase 3: 18 matches/sec for 4 minute (240 seconds)
 echo ""
-echo "PHASE 3: Starting 80 matches/sec for 1 minute..."
+echo "PHASE 3: Starting 18 matches/sec for 4 minute..."
 phase3_start=$(date +%s)
-generate_orders 80 60
+generate_orders 18 240
 phase3_end=$(date +%s)
 echo "Phase 3 completed in $((phase3_end - phase3_start)) seconds"
 
 total_end=$(date +%s)
 total_duration=$((total_end - start_time))
-total_matches=$((80*180 + 100*120 + 80*60))
+total_matches=$((18*240 + 84*1800 + 18*240))
 
 echo ""
 echo "======================================="
 echo "Load Test Completed!"
 echo "Total Duration: $total_duration seconds"
-echo "Total Matches Generated: $total_matches"
+echo "Total Request Generated: $total_matches"
 echo "Average Rate: $(echo "scale=2; $total_matches / $total_duration" | bc -l) matches/sec"
 echo "======================================="
