@@ -17,7 +17,6 @@ public class TraceConfig {
     public Timer matchOrderTimer() {
         return Timer.builder("order.matching.time")
                 .description("Time taken to match orders")
-                .publishPercentileHistogram()
                 .minimumExpectedValue(java.time.Duration.ofMillis(1))
                 .maximumExpectedValue(java.time.Duration.ofSeconds(10))
                 .register(meterRegistry);
