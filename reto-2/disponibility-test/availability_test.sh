@@ -46,7 +46,7 @@ reserve_product() {
     fi
 }
 
-# Function to send requests for a duration with random intervals
+# Function to send requests for a duration with controlled load (80-100 req/min)
 send_requests_for_duration() {
     local duration=$1
     local description=$2
@@ -56,7 +56,8 @@ send_requests_for_duration() {
     while [ $(date +%s) -lt $end_time ]; do
         reserve_product
         echo -n "."
-        sleep $((RANDOM % 3 + 1))
+        # Sleep between 0.6-0.75 seconds (80-100 requests per minute)
+        sleep $(echo "scale=2; 0.6 + ($RANDOM % 16) / 100" | bc)
     done
     echo " Done!"
 }
