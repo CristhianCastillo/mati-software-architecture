@@ -1,0 +1,115 @@
+server:
+  port: 8083
+  compression:
+    enabled: true
+    min-response-size: 1024
+spring:
+  mvc:
+    async:
+      request-timeout: "1200s"
+  application:
+    name: "product-master-engine-ms"
+  devtools:
+    add-properties: false
+  profiles:
+    include: null
+  main:
+    lazy-initialization: false
+  cloud:
+    config:
+      enabled: false
+      import: ""
+management:
+  tracing:
+    sampling:
+      probability: 0.0
+    baggage:
+      correlation:
+        fields:
+          - "message-id"
+      remote-fields: "message-id"
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      path-mapping:
+        loggers: "api/v1/products/master/actuator/loggers"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: "always"
+    loggers:
+      access: "unrestricted"
+    shutdown:
+      access: "unrestricted"
+    refresh:
+      access: "unrestricted"
+  health:
+    diskspace:
+      enabled: false
+    ping:
+      enabled: false
+    refresh:
+      enabled: true
+    circuitbreakers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: "${spring.application.name}"
+logging:
+  level:
+    org:
+      springframework:
+        boot:
+          actuate: "DEBUG"
+info:
+  app:
+    name: "Product Master Engine Microservice"
+    description: "Manage Products for the Project"
+    version: "1.0.0"
+endpoints:
+  shutdown:
+    enabled: true
+cors.allowed:
+- path: "/**"
+  headers:
+  - "*"
+  origins:
+  - "http://localhost:4200"
+  - "http://localhost:8080"
+  - "https://sgb-web-prod.azureedge.net"
+  methods:
+  - "HEAD"
+  - "OPTIONS"
+  - "GET"
+  - "POST"
+  - "PUT"
+  - "PATCH"
+  - "DELETE"
+- path: "/somePath/**"
+  headers:
+  - "*"
+  origins:
+  - "http://localhost:4200"
+  methods:
+  - "GET"
+  - "POST"
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+infrastructure:
+  adapters:
+    rest-consumer:
+      principal-node-service:
+        url: "${PRINCIPAL_NODE_URL_HOST:http://localhost:8081}"
+        default-path: "/api/v1/product"
+        timeout-connect: 5000
+        timeout-read: 5000
+      secondary-node-service:
+        url: "${SECONDARY_NODE_URL_HOST:http://localhost:8082}"
+        default-path: "/api/v1/product"
+        timeout-connect: 5000
+        timeout-read: 5000
