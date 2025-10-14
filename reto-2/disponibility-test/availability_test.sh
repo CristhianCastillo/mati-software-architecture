@@ -62,7 +62,7 @@ send_requests_for_duration() {
 }
 
 # 1. Send random time requests for 3 minutes
-send_requests_for_duration 3 "Sending Reserve Products requests"
+send_requests_for_duration 10 "Sending Reserve Products requests"
 
 # 2. Change Env on Principal Node (Bad Update)
 echo "Applying bad configuration update..."
@@ -78,7 +78,7 @@ echo "Refreshing environment..."
 curl --location --request POST 'http://localhost:8081/actuator/refresh'
 
 # 4. Send random time requests for 2 minutes after bad update
-send_requests_for_duration 2 "Sending Reserve Products requests after bad update"
+send_requests_for_duration 4 "Sending Reserve Products requests after bad update"
 
 # 5. Change Env on Principal Node (Good Update)
 echo "Applying good configuration update..."
@@ -94,6 +94,6 @@ echo "Refreshing environment..."
 curl --location --request POST 'http://localhost:8081/actuator/refresh'
 
 # 7. Send random time requests for 3 minutes after good update
-send_requests_for_duration 3 "Sending final Reserve Products requests"
+send_requests_for_duration 10 "Sending final Reserve Products requests"
 
 echo "Availability test completed!"
