@@ -7,4 +7,4 @@ scrape_configs:
   - job_name: 'product-master-engine-ms-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'client-ms-app:8083' ]
+      - targets: [ 'product-master-engine-ms-app:8083' ]
