@@ -12,6 +12,7 @@
 
 ### Infraestructure
 - cd reto-2/infra
+- Init: docker compose up -d
 - Start: docker compose start
 - Stop: docker compose stop
 - Destroy: docker compose down

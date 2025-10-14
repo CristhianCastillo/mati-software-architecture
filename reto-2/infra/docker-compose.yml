@@ -99,7 +99,6 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     depends_on:
       - gateway
-      - prometheus
     entrypoint:
       - sh
       - -euc
