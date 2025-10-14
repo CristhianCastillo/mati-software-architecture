@@ -4,6 +4,7 @@ import co.com.product.master.consumer.adapter.NodePrincipalAdapter;
 import co.com.product.master.consumer.adapter.NodeSecondaryAdapter;
 import co.com.product.master.model.reserve.gateways.PrincipalReserveGateway;
 import co.com.product.master.model.reserve.gateways.SecondaryReserveGateway;
+import io.micrometer.core.instrument.Counter;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,8 +34,10 @@ public class RestConsumerConfig {
     }
 
     @Bean
-    public PrincipalReserveGateway principalReserveGateway(@Qualifier("principalNodeWebClient") WebClient principalNodeWebClient, NodePrincipalConsumerConfig nodePrincipalConsumerConfig) {
-        return new NodePrincipalAdapter(principalNodeWebClient, nodePrincipalConsumerConfig.getDefaultPath());
+    public PrincipalReserveGateway principalReserveGateway(@Qualifier("principalNodeWebClient") WebClient principalNodeWebClient,
+                                                           NodePrincipalConsumerConfig nodePrincipalConsumerConfig,
+                                                           @Qualifier("principalNodeReserveProductsCount") Counter principalNodeReserveProductsCount) {
+        return new NodePrincipalAdapter(principalNodeWebClient, nodePrincipalConsumerConfig.getDefaultPath(), principalNodeReserveProductsCount);
     }
 
     @Bean(name = "secondaryNodeWebClient")
@@ -49,8 +52,10 @@ public class RestConsumerConfig {
     }
 
     @Bean
-    public SecondaryReserveGateway secondaryReserveGateway(@Qualifier("secondaryNodeWebClient") WebClient secondaryNodeWebClient, NodeSecondaryConsumerConfig nodeSecondaryConsumerConfig) {
-        return new NodeSecondaryAdapter(secondaryNodeWebClient, nodeSecondaryConsumerConfig.getDefaultPath());
+    public SecondaryReserveGateway secondaryReserveGateway(@Qualifier("secondaryNodeWebClient") WebClient secondaryNodeWebClient,
+                                                           NodeSecondaryConsumerConfig nodeSecondaryConsumerConfig,
+                                                           @Qualifier("secondaryNodeReserveProductsCount") Counter secondaryNodeReserveProductsCount) {
+        return new NodeSecondaryAdapter(secondaryNodeWebClient, nodeSecondaryConsumerConfig.getDefaultPath(), secondaryNodeReserveProductsCount);
     }
 
 

@@ -11,6 +11,7 @@ import co.com.product.master.model.exception.TechnicalException;
 import co.com.product.master.model.reserve.Reserve;
 import co.com.product.master.model.reserve.ReserveResult;
 import co.com.product.master.model.reserve.gateways.SecondaryReserveGateway;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,6 +32,7 @@ public class NodeSecondaryAdapter implements SecondaryReserveGateway {
 
     private final WebClient clientWebClient;
     private final String defaultPath;
+    private final Counter secondaryNodeReserveProductsCount;
 
     @Override
     public Mono<ReserveResult> reserveProduct(Reserve reserve) {
@@ -44,7 +46,10 @@ public class NodeSecondaryAdapter implements SecondaryReserveGateway {
                 .onStatus(HttpStatusCode::isError, this::handlerError)
                 .bodyToMono(new ParameterizedTypeReference<GenericResponseDto<ProductReserveResponseDto>>() {
                 })
-                .doOnSuccess(productReserveResponse -> log.info("SECONDARY :: Product Reserve Response", kv("productReserveResponse", productReserveResponse)))
+                .doOnSuccess(productReserveResponse -> {
+                    log.info("SECONDARY :: Product Reserve Response", kv("productReserveResponse", productReserveResponse));
+                    this.secondaryNodeReserveProductsCount.increment();
+                })
                 .map(response ->
                         ProductMapper.MAPPER.responseToModel(response.getResult()))
                 .onErrorMap(Predicate.not(ProductException.class::isInstance),
