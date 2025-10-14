@@ -17,6 +17,33 @@
 - Stop: docker compose stop
 - Destroy: docker compose down
 
+### Execution Flow
+- Reserve Products: curl --location 'http://localhost:8083/api/v1/master/product/reserve' \
+--header 'message-id: someImportantMessageId' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": 1,
+    "name": "Papas Margarita",
+    "count": 234,
+    "clientId": 23
+}'
+
+- Change Env on Principal Node (Bad Update): curl --location 'http://localhost:8081/api/v1/properties' \
+--header 'Content-Type: application/json' \
+--data '{
+    "key": "infrastructure.adapters.db.status",
+    "value": "ENABLEDs"
+}'
+
+- Refresh Envs on Principal Node: curl --location --request POST 'http://localhost:8081/actuator/refresh'
+
+- Change Env on Principal Node (Good Update): curl --location 'http://localhost:8081/api/v1/properties' \
+--header 'Content-Type: application/json' \
+--data '{
+    "key": "infrastructure.adapters.db.status",
+    "value": "ENABLED"
+}'
+
 
 ## Monitoring
 
