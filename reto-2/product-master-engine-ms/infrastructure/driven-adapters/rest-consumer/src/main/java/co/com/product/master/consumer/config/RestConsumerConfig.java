@@ -36,8 +36,10 @@ public class RestConsumerConfig {
     @Bean
     public PrincipalReserveGateway principalReserveGateway(@Qualifier("principalNodeWebClient") WebClient principalNodeWebClient,
                                                            NodePrincipalConsumerConfig nodePrincipalConsumerConfig,
-                                                           @Qualifier("principalNodeReserveProductsCount") Counter principalNodeReserveProductsCount) {
-        return new NodePrincipalAdapter(principalNodeWebClient, nodePrincipalConsumerConfig.getDefaultPath(), principalNodeReserveProductsCount);
+                                                           @Qualifier("principalNodeReserveProductsCount") Counter principalNodeReserveProductsCount,
+                                                           @Qualifier("principalNodeReserveProductsFailedCount") Counter principalNodeReserveProductsFailedCount) {
+        return new NodePrincipalAdapter(principalNodeWebClient, nodePrincipalConsumerConfig.getDefaultPath(),
+                principalNodeReserveProductsCount, principalNodeReserveProductsFailedCount);
     }
 
     @Bean(name = "secondaryNodeWebClient")

@@ -25,4 +25,12 @@ public class TraceConfig {
                 .description("Total number of requests to reserve products from secondary node")
                 .register(meterRegistry);
     }
+
+    @Bean("principalNodeReserveProductsFailedCount")
+    public Counter principalNodeReserveProductsFailedCount() {
+        return Counter.builder("principal.node.reserveProduct.failed.count")
+                .description("Total number of requests failed to reserve products from principal node")
+                .register(meterRegistry);
+    }
+
 }

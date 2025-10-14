@@ -33,6 +33,7 @@ public class NodePrincipalAdapter implements PrincipalReserveGateway {
     private final WebClient clientWebClient;
     private final String defaultPath;
     private final Counter principalNodeReserveProductsCount;
+    private final Counter principalNodeReserveProductsFailedCount;
 
     @Override
     public Mono<ReserveResult> reserveProduct(Reserve reserve) {
@@ -72,6 +73,7 @@ public class NodePrincipalAdapter implements PrincipalReserveGateway {
         log.error("PRINCIPAL :: Client Error Response", kv("clientErrorResponse", apiErrorResponse));
         if (apiErrorResponse.getCode() == GenericResponseDto.ERROR_CODE) {
             if (apiErrorResponse.getResult().getCode().equalsIgnoreCase("PRODUCT-500")) {
+                this.principalNodeReserveProductsFailedCount.increment();
                 return Mono.error(new TechnicalException(apiErrorResponse.getResult().getMessage(),
                         TechnicalMessage.CLIENT_GENERIC_ERROR));
             }
