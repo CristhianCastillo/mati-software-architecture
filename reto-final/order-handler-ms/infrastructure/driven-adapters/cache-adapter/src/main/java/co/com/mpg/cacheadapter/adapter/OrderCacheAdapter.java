@@ -49,6 +49,7 @@ public class OrderCacheAdapter implements OrderCacheGateway {
     public Mono<Void> delete(Order order) {
         return Mono.defer(() -> {
             this.ordersCache.invalidate(order.getId());
+            log.info("Order Cache deleted with id={}", order.getId());
             return Mono.empty();
         });
     }

@@ -15,9 +15,11 @@ public class BrokerAdapter implements OrderEventGateway {
 
     @Override
     public Mono<String> createOrder(Order order, Payment payment) {
-        return Mono.delay(Duration.ofMillis(100))
-                .doOnSubscribe(sub -> log.info("Starting Send Notification for Order with Id {} and Payment with Id {}", order.getId(), payment.getId()))
-                .thenReturn("SomeNotificationId")
-                .doOnSuccess(su -> log.info("Notification sent for Order with Id {} and Payment with Id {}", order.getId(), payment.getId()));
+        return Mono.defer(() -> {
+            return Mono.delay(Duration.ofMillis(100))
+                    .doOnSubscribe(sub -> log.info("Starting Send Notification for Order with Id {} and Payment with Id {}", order.getId(), payment.getId()))
+                    .thenReturn("SomeNotificationId")
+                    .doOnSuccess(su -> log.info("Notification sent for Order with Id {} and Payment with Id {}", order.getId(), payment.getId()));
+        });
     }
 }

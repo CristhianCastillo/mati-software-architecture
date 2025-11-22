@@ -41,14 +41,11 @@ public class OrderUseCase {
                                         Mono<Void> deleteCacheOrderFlow = this.orderCacheGateway.delete(order);
                                         Mono<String> sendNotificationCreteOrderFlow = this.orderEventGateway.createOrder(order, payment);
                                         return this.orderGateway.save(orderParam)
-                                                .then(this.orderEventGateway.createOrder(order,payment))
-                                                .then(Mono.zip(deleteCacheOrderFlow, sendNotificationCreteOrderFlow)
-                                                        .flatMap(data -> {
-                                                            data.getT1();
-                                                            data.getT2();
-                                                            return this.orderEventGateway.createOrder(order, payment);
-                                                        }))
-                                                .then(Mono.just(order));
+                                                .flatMap(orderSaved -> {
+                                                    deleteCacheOrderFlow.subscribe();
+                                                    sendNotificationCreteOrderFlow.subscribe();
+                                                    return Mono.just(order);
+                                                });
                                     }));
                 });
     }
