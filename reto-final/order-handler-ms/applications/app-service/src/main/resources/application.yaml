@@ -15,6 +15,8 @@ spring:
     include: null
   main:
     lazy-initialization: false
+  cache:
+    type: caffeine
 management:
   tracing:
     sampling:
@@ -22,12 +24,12 @@ management:
     baggage:
       correlation:
         fields:
-          - "message-id"
+        - "message-id"
       remote-fields: "message-id"
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "health,prometheus"
       path-mapping:
         loggers: "api/v1/orders-handler/actuator/loggers"
   endpoint:
@@ -36,11 +38,11 @@ management:
         enabled: true
       show-details: "always"
     loggers:
-      access: unrestricted
+      access: "unrestricted"
     shutdown:
-      access: unrestricted
+      access: "unrestricted"
     refresh:
-      access: unrestricted
+      access: "unrestricted"
   health:
     diskspace:
       enabled: false
@@ -53,7 +55,7 @@ management:
       enabled: true
   metrics:
     tags:
-      application: ${spring.application.name}
+      application: "${spring.application.name}"
 logging:
   level:
     org:
@@ -65,39 +67,36 @@ info:
     name: "Order Handler Microservice"
     description: "Manage Orders for the Project"
     version: "1.0.0"
-
 endpoints:
   shutdown:
     enabled: true
-
 infrastructure:
   adapters:
     db:
       status: "ENABLED"
-
 cors.allowed:
-  -
-    path: "/**"
-    headers:
-      - "*"
-    origins:
-      - "http://localhost:4200"
-      - "http://localhost:8080" # For Prometheus
-      - "https://sgb-web-prod.azureedge.net"
-    methods:
-      - "HEAD"
-      - "OPTIONS"
-      - "GET"
-      - "POST"
-      - "PUT"
-      - "PATCH"
-      - "DELETE"
-  -
-    path: "/somePath/**"
-    headers:
-      - "*"
-    origins:
-      - "http://localhost:4200"
-    methods:
-      - "GET"
-      - "POST"
+- path: "/**"
+  headers:
+  - "*"
+  origins:
+  - "http://localhost:4200"
+  - "http://localhost:8080"
+  - "https://sgb-web-prod.azureedge.net"
+  methods:
+  - "HEAD"
+  - "OPTIONS"
+  - "GET"
+  - "POST"
+  - "PUT"
+  - "PATCH"
+  - "DELETE"
+- path: "/somePath/**"
+  headers:
+  - "*"
+  origins:
+  - "http://localhost:4200"
+  methods:
+  - "GET"
+  - "POST"
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"

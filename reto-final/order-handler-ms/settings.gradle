@@ -20,3 +20,13 @@ include ':usecase'
 project(':app-service').projectDir = file('./applications/app-service')
 project(':model').projectDir = file('./domain/model')
 project(':usecase').projectDir = file('./domain/usecase')
+include ':cache-adapter'
+project(':cache-adapter').projectDir = file('./infrastructure/driven-adapters/cache-adapter')
+include ':rest-adapter'
+project(':rest-adapter').projectDir = file('./infrastructure/driven-adapters/rest-adapter')
+include ':db-adapter'
+project(':db-adapter').projectDir = file('./infrastructure/driven-adapters/db-adapter')
+include ':broker-adapter'
+project(':broker-adapter').projectDir = file('./infrastructure/driven-adapters/broker-adapter')
+include ':reactive-web'
+project(':reactive-web').projectDir = file('./infrastructure/entry-points/reactive-web')

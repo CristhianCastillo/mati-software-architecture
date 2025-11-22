@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		cleanArchitectureVersion = '3.26.3'
+		cleanArchitectureVersion = '3.27.0'
 		springBootVersion = '3.5.7'
 		sonarVersion = '7.0.1.6134'
 		jacocoVersion = '0.8.14'
@@ -10,6 +10,7 @@ buildscript {
         logstashLogbackVersion = '8.1'
         modelModule = 'model'
         useCaseModule = 'usecase'
+        mapstructVersion = '1.5.5.Final'
 	}
 }
 

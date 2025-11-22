@@ -1,8 +1,8 @@
 package co.com.mpg.model.order;
-import lombok.Builder;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-//import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -11,4 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Order {
+    private String id;
+    private String productId;
+    private int productCount;
 }

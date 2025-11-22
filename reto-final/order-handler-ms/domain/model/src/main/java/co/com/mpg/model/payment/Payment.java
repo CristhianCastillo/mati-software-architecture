@@ -11,4 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Payment {
+    String id;
+    String status;
+    String value;
 }

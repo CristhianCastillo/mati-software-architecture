@@ -5,5 +5,5 @@ import co.com.mpg.model.payment.Payment;
 import reactor.core.publisher.Mono;
 
 public interface OrderEventGateway {
-    Mono<Void> createOrder(Order order, Payment payment);
+    Mono<String> createOrder(Order order, Payment payment);
 }

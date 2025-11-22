@@ -23,20 +23,31 @@ public class OrderUseCase {
 
     public Mono<Order> createOrder(OrderParam orderParam) {
         return this.orderCacheGateway.getById(orderParam.getId())
-                .switchIfEmpty(this.processOrder(orderParam))
-                .flatMap(order -> Mono.<Order>error(new BusinessException(String.format("Order with Id: %s already exists", orderParam.getId()), TechnicalMessage.ORDER_ALREADY_EXISTS)));
+                .flatMap(order -> Mono.<Order>error(new BusinessException(String.format("Order with Id: %s already exists", orderParam.getId()), TechnicalMessage.ORDER_ALREADY_EXISTS)))
+                .switchIfEmpty(this.processOrder(orderParam));
+
     }
 
     private Mono<Order> processOrder(OrderParam orderParam) {
-        return this.orderCacheGateway.save(Order.builder().build())
+        return this.orderCacheGateway.save(Order.builder()
+                        .id(orderParam.getId())
+                        .productId(orderParam.getProductId())
+                        .productCount(orderParam.getProductCount())
+                        .build())
                 .flatMap(order -> {
                     return this.productGateway.reserveProduct(orderParam.getProductId(), orderParam.getProductCount())
                             .then(this.paymentGateway.execute(orderParam.getId())
                                     .flatMap(payment -> {
                                         Mono<Void> deleteCacheOrderFlow = this.orderCacheGateway.delete(order);
-                                        Mono<Void> sendNotificationCreteOrderFlow = this.orderEventGateway.createOrder(order, payment);
+                                        Mono<String> sendNotificationCreteOrderFlow = this.orderEventGateway.createOrder(order, payment);
                                         return this.orderGateway.save(orderParam)
-                                                .then(Mono.zip(deleteCacheOrderFlow, sendNotificationCreteOrderFlow))
+                                                .then(this.orderEventGateway.createOrder(order,payment))
+                                                .then(Mono.zip(deleteCacheOrderFlow, sendNotificationCreteOrderFlow)
+                                                        .flatMap(data -> {
+                                                            data.getT1();
+                                                            data.getT2();
+                                                            return this.orderEventGateway.createOrder(order, payment);
+                                                        }))
                                                 .then(Mono.just(order));
                                     }));
                 });
