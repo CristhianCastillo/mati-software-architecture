@@ -8,5 +8,5 @@ public interface OrderCacheGateway {
 
     Mono<Order> save(Order order);
 
-    Mono<Void> delete(Order order);
+    Mono<String> delete(Order order);
 }

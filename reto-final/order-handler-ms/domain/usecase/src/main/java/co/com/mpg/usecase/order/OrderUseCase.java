@@ -38,7 +38,7 @@ public class OrderUseCase {
                     return this.productGateway.reserveProduct(orderParam.getProductId(), orderParam.getProductCount())
                             .then(this.paymentGateway.execute(orderParam.getId())
                                     .flatMap(payment -> {
-                                        Mono<Void> deleteCacheOrderFlow = this.orderCacheGateway.delete(order);
+                                        Mono<String> deleteCacheOrderFlow = this.orderCacheGateway.delete(order);
                                         Mono<String> sendNotificationCreteOrderFlow = this.orderEventGateway.createOrder(order, payment);
                                         return this.orderGateway.save(orderParam)
                                                 .flatMap(orderSaved -> {

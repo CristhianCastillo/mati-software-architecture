@@ -7,6 +7,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 @Slf4j
 @Service
 public class ProductAdapter implements ProductGateway {
@@ -14,8 +16,8 @@ public class ProductAdapter implements ProductGateway {
     @Override
     public Mono<Void> reserveProduct(String productId, int count) {
         return Mono.delay(Duration.ofMillis(100))
-                .doOnSubscribe(sub -> log.info("Reserving product with id {}", productId))
+                .doOnSubscribe(sub -> log.info("Request :: Rest HTTP Execute Product Reservation with Id {}", productId))
                 .then()
-                .doOnSuccess(res -> log.info("Reservation completed for product with id {}", productId));
+                .doOnSuccess(order -> log.info("Response :: Rest HTTP Execute Product Reservation COMPLETED Order", kv("productReserved", order)));
     }
 }

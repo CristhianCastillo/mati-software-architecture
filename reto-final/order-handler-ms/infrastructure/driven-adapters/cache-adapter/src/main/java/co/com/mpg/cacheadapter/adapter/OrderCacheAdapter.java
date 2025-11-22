@@ -27,12 +27,13 @@ public class OrderCacheAdapter implements OrderCacheGateway {
     @Override
     public Mono<Order> getById(String orderId) {
         return Mono.defer(() -> {
+            log.info("Request :: Cache Get Order with Id {}", orderId);
             Order order = this.ordersCache.getIfPresent(orderId);
             if (order == null) {
-                log.info("Order NOT found with id={}", orderId);
+                log.info("Response :: Cache Get Order NOT found with Id {}", orderId);
                 return Mono.empty();
             }
-            log.info("Order found with id={}", order.getId());
+            log.info("Response :: Cache Get Order FOUND with Id {}", order.getId());
             return Mono.just(order);
         });
     }
@@ -40,17 +41,20 @@ public class OrderCacheAdapter implements OrderCacheGateway {
     @Override
     public Mono<Order> save(Order order) {
         return Mono.defer(() -> {
+            log.info("Request :: Cache Save Order {}", order);
             this.ordersCache.put(order.getId(), order);
+            log.info("Response :: Cache Save Order SAVED with Id {}", order.getId());
             return Mono.just(order);
         });
     }
 
     @Override
-    public Mono<Void> delete(Order order) {
+    public Mono<String> delete(Order order) {
         return Mono.defer(() -> {
+            log.info("Request :: Cache Delete Order with Id {}", order.getId());
             this.ordersCache.invalidate(order.getId());
-            log.info("Order Cache deleted with id={}", order.getId());
-            return Mono.empty();
+            log.info("Response :: Cache Delete Order DELETED with Id {}", order.getId());
+            return Mono.just(order.getId());
         });
     }
 }

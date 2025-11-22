@@ -1,4 +1,4 @@
-package co.com.mpg.api;
+package co.com.mpg.api.controller;
 
 import co.com.mpg.api.constants.TracingConstants;
 import co.com.mpg.api.manager.OrderManager;

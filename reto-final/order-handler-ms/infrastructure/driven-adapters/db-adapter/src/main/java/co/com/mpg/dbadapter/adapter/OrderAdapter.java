@@ -9,6 +9,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 @Service
 @Slf4j
 public class OrderAdapter implements OrderGateway {
@@ -16,12 +18,12 @@ public class OrderAdapter implements OrderGateway {
     @Override
     public Mono<Order> save(OrderParam orderParam) {
         return Mono.delay(Duration.ofMillis(100))
-                .doOnSubscribe(sub -> log.info("Starting Save order with id {}", orderParam.getId()))
+                .doOnSubscribe(sub -> log.info("Request :: DB Save Order", kv("parameters", orderParam)))
                 .thenReturn(Order.builder()
                         .id(orderParam.getId())
                         .productCount(orderParam.getProductCount())
                         .productId(orderParam.getProductId())
                         .build())
-                .doOnSuccess(orderSaved -> log.info("Order saved with id {}", orderSaved.getId()));
+                .doOnSuccess(order -> log.info("Response :: DB Save Order", kv("orderSaved", order)));
     }
 }
