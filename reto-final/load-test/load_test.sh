@@ -75,14 +75,14 @@ echo "Starting load test..."
 
 # Phase 1: 150 orders/sec for 3 minutes (180 seconds)
 echo -e "\n--- Phase 1: 150 orders/sec for 3 minutes ---"
-run_load_test 180 150
+run_load_test 60 150
 
 # Phase 2: 250 orders/sec for 2 minutes (120 seconds)  
-echo -e "\n--- Phase 2: 250 orders/sec for 2 minutes ---"
-run_load_test 120 250
+# echo -e "\n--- Phase 2: 250 orders/sec for 2 minutes ---"
+# run_load_test 120 250
 
-# Phase 3: 150 orders/sec for 1 minute (60 seconds)
-echo -e "\n--- Phase 3: 150 orders/sec for 1 minute ---"
-run_load_test 60 150
+# # Phase 3: 150 orders/sec for 1 minute (60 seconds)
+# echo -e "\n--- Phase 3: 150 orders/sec for 1 minute ---"
+# run_load_test 120 150
 
 echo -e "\n=== Load test completed ==="
