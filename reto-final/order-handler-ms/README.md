@@ -40,6 +40,53 @@ interactuar.
 
 Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
 
+#### HTTP API Endpoints
+
+La aplicación expone los siguientes endpoints REST a través del puerto **8081**:
+
+##### POST /api/v1/order
+Crea una nueva orden en el sistema.
+
+**Request:**
+```json
+{
+  "id": "string",
+  "productId": "string", 
+  "productCount": 0
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "code": 0,
+  "description": "Success",
+  "result": {
+    "id": "string",
+    "productId": "string",
+    "productCount": 0
+  }
+}
+```
+
+**Ejemplo de uso:**
+```bash
+curl -X POST http://localhost:8081/api/v1/order \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "order-123",
+    "productId": "product-456", 
+    "productCount": 2
+  }'
+```
+
+#### Endpoints de Monitoreo
+
+- **GET /health** - Health check del servicio
+- **GET /prometheus** - Métricas de Prometheus  
+- **GET /metrics** - Métricas generales
+- **GET /api/v1/orders-handler/actuator/loggers** - Configuración de loggers
+
 ## Application
 
 Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
