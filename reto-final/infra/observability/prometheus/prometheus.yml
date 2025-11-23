@@ -4,7 +4,7 @@ global:
   evaluation_interval: 5s # Evaluate rules every 5 seconds.
 
 scrape_configs:
-  - job_name: 'product-master-engine-ms-app'
+  - job_name: 'order-handler-ms-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'product-master-engine-ms-app:8083' ]
+      - targets: [ 'order-handler-ms-app:8081' ]

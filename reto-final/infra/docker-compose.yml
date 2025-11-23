@@ -119,8 +119,8 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./observability/grafana/master-node-products-dashboard.yml:/etc/grafana/provisioning/dashboards/master-node-products-dashboard.yml
-      - ./observability/grafana/master-node-products-dashboard.json:/etc/grafana/dashboards/master-node-products-dashboard.json
+      - ./observability/grafana/order-handler-dashboard.yml:/etc/grafana/provisioning/dashboards/order-handler-dashboard.yml
+      - ./observability/grafana/order-handler-dashboard.json:/etc/grafana/dashboards/order-handler-dashboard.json
     healthcheck:
       test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
       interval: 10s
@@ -211,41 +211,10 @@ services:
   #   networks:
   #     - postgres
   
-  product-master-engine-ms-app:
-    image: cristhian117/product-master-engine-ms:1.0.0
+  order-handler-ms-app:
+    image: cristhian117/order-handler-ms:1.0.0
     volumes:
       - ./observability/opentelemetry/opentelemetry-javaagent.jar:/app/libs/opentelemetry-javaagent.jar
-    mem_limit: 700m
-    ports:
-      - "8083:8083"
-    networks:
-      - postgres
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    healthcheck:
-      test: "curl --fail --silent localhost:8083/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    environment:
-      PRINCIPAL_NODE_URL_HOST: "http://product-principal-node-ms-app:8081"
-      SECONDARY_NODE_URL_HOST: "http://product-secondary-node-ms-app:8082"
-      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent.jar"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none 
-      OTEL_SERVICE_NAME: "product-master-engine-ms"
-    depends_on:
-      - product-principal-node-ms-app
-      - product-secondary-node-ms-app
-
-  product-principal-node-ms-app:
-    image: cristhian117/product-principal-node-engine-ms:1.0.0
     mem_limit: 700m
     ports:
       - "8081:8081"
@@ -264,29 +233,11 @@ services:
       retries: 10
       start_period: 10s
     environment:
-      MASTER_NODE_URL_HOST: "http://product-master-engine-ms-app:8083"
-
-  product-secondary-node-ms-app:
-    image: cristhian117/product-secondary-node-engine-ms:1.0.0
-    mem_limit: 700m
-    ports:
-      - "8082:8082"
-    networks:
-      - postgres
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    healthcheck:
-      test: "curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    environment:
-      MASTER_NODE_URL_HOST: "http://product-master-engine-ms-app:8083"
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none 
+      OTEL_SERVICE_NAME: "order-handler-ms-app"
 
 networks:
   postgres:
